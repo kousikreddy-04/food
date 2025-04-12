@@ -232,6 +232,31 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Food Identification API
+  app.post("/api/identify-food", ensureAuth, async (req, res) => {
+    try {
+      const { image } = req.body;
+      
+      if (!image) {
+        return res.status(400).json({ message: "Image is required" });
+      }
+
+      // Remove data URL prefix if present
+      const base64Image = image.replace(/^data:image\/\w+;base64,/, "");
+      
+      // Import the OpenAI function
+      const { identifyFoodFromImage } = await import("./openai");
+      
+      // Get AI-identified food items
+      const identifiedItems = await identifyFoodFromImage(base64Image);
+      
+      res.json(identifiedItems);
+    } catch (error) {
+      console.error("Error identifying food:", error);
+      res.status(500).json({ message: "Failed to identify food" });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }

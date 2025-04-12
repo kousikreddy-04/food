@@ -10,6 +10,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { CameraComponent } from "@/components/ui/camera";
+import { FoodIdentifier } from "@/components/food-identifier";
 import { Camera, X, Check, Image } from "lucide-react";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { 
@@ -37,6 +38,16 @@ export default function AddItemPage() {
   const { toast } = useToast();
   const [isCameraOpen, setIsCameraOpen] = useState(false);
   const [capturedImage, setCapturedImage] = useState<string | null>(null);
+  
+  // Handle food identification results
+  const handleFoodIdentified = (food: { name: string; category: typeof foodCategories[number] }) => {
+    form.setValue("name", food.name);
+    form.setValue("category", food.category);
+    toast({
+      title: "Food Identified",
+      description: `Identified as ${food.name} (${food.category})`,
+    });
+  };
   
   // Define form schema
   const formSchema = z.object({
