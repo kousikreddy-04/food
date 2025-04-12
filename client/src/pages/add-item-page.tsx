@@ -285,7 +285,7 @@ export default function AddItemPage() {
                       ) : (
                         <div className="flex flex-col items-center">
                           <Camera className="h-12 w-12 text-gray-400" />
-                          <div className="flex text-sm text-gray-600 mt-2">
+                          <div className="flex flex-wrap justify-center gap-2 text-sm text-gray-600 mt-2">
                             <Button 
                               variant="outline" 
                               size="sm"
@@ -315,6 +315,10 @@ export default function AddItemPage() {
                                 />
                               </label>
                             </Button>
+                            
+                            <FoodIdentifier 
+                              onSelect={handleFoodIdentified} 
+                            />
                           </div>
                           <p className="text-xs text-gray-500 mt-2">PNG, JPG, GIF up to 5MB</p>
                         </div>
