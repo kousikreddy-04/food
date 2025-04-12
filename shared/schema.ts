@@ -27,6 +27,7 @@ export const foodCategories = [
   "vegetables",
   "fruits",
   "grains",
+  "medicines",
   "other"
 ] as const;
 

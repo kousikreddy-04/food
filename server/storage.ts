@@ -1,11 +1,15 @@
 import { 
   User, InsertUser, FoodItem, InsertFoodItem, 
-  Recipe, Ingredient, foodCategories
+  Recipe, Ingredient, foodCategories, users, foodItems
 } from "@shared/schema";
 import session from "express-session";
 import createMemoryStore from "memorystore";
+import connectPg from "connect-pg-simple";
+import { db, pool } from "./db";
+import { eq } from "drizzle-orm";
 
 const MemoryStore = createMemoryStore(session);
+const PostgresSessionStore = connectPg(session);
 
 // Mock recipes and ingredients data
 const mockRecipes: Recipe[] = [
@@ -185,4 +189,65 @@ export class MemStorage implements IStorage {
   }
 }
 
-export const storage = new MemStorage();
+export class DatabaseStorage implements IStorage {
+  sessionStore: session.Store;
+
+  constructor() {
+    this.sessionStore = new PostgresSessionStore({ 
+      pool, 
+      createTableIfMissing: true 
+    });
+  }
+
+  async getUser(id: number): Promise<User | undefined> {
+    const [user] = await db.select().from(users).where(eq(users.id, id));
+    return user || undefined;
+  }
+
+  async getUserByUsername(username: string): Promise<User | undefined> {
+    const [user] = await db.select().from(users).where(eq(users.username, username));
+    return user || undefined;
+  }
+
+  async createUser(insertUser: InsertUser): Promise<User> {
+    const [user] = await db.insert(users).values({
+      ...insertUser,
+      name: insertUser.name ?? null
+    }).returning();
+    return user;
+  }
+
+  async getFoodItems(userId: number): Promise<FoodItem[]> {
+    return await db.select().from(foodItems).where(eq(foodItems.userId, userId));
+  }
+
+  async getFoodItem(id: number): Promise<FoodItem | undefined> {
+    const [item] = await db.select().from(foodItems).where(eq(foodItems.id, id));
+    return item || undefined;
+  }
+
+  async createFoodItem(foodItem: InsertFoodItem & { userId: number }): Promise<FoodItem> {
+    const [item] = await db.insert(foodItems).values({
+      ...foodItem,
+      image: foodItem.image ?? null
+    }).returning();
+    return item;
+  }
+
+  async deleteFoodItem(id: number): Promise<void> {
+    await db.delete(foodItems).where(eq(foodItems.id, id));
+  }
+
+  async getRecipes(): Promise<Recipe[]> {
+    // For now, we'll continue using the mock data for recipes
+    return mockRecipes;
+  }
+
+  async getRecipeIngredients(recipeId: number): Promise<Ingredient[]> {
+    // For now, we'll continue using the mock data for ingredients
+    return mockIngredients.filter(ingredient => ingredient.recipeId === recipeId);
+  }
+}
+
+// Switch to database storage
+export const storage = new DatabaseStorage();

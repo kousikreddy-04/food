@@ -182,6 +182,56 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // AI Recipe Suggestions API
+  app.get("/api/ai-recipes", ensureAuth, async (req, res) => {
+    try {
+      const userId = req.user!.id;
+      const foodItems = await storage.getFoodItems(userId);
+      
+      // Filter out medicines
+      const nonMedicineItems = foodItems.filter(item => item.category !== 'medicines');
+      
+      // Get ingredient names for AI suggestions
+      const ingredientNames = nonMedicineItems.map(item => item.name);
+      
+      // Import the OpenAI function here to avoid circular dependencies
+      const { getRecipeSuggestions } = await import("./openai");
+      
+      // Get AI-generated recipe suggestions
+      const recipes = await getRecipeSuggestions(ingredientNames);
+      
+      res.json(recipes);
+    } catch (error) {
+      console.error("Error getting AI recipe suggestions:", error);
+      res.status(500).json({ message: "Failed to get AI recipe suggestions" });
+    }
+  });
+
+  // Medicines API
+  app.get("/api/medicines", ensureAuth, async (req, res) => {
+    try {
+      const userId = req.user!.id;
+      const allItems = await storage.getFoodItems(userId);
+      
+      // Filter only medicines
+      const medicines = allItems
+        .filter(item => item.category === 'medicines')
+        .map(item => {
+          const expiryDate = new Date(item.expiryDate);
+          const daysLeft = differenceInDays(expiryDate, new Date());
+          
+          return {
+            ...item,
+            daysLeft
+          };
+        });
+      
+      res.json(medicines);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch medicines" });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }
