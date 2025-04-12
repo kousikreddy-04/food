@@ -4,6 +4,8 @@ import { MainLayout } from "@/components/main-layout";
 import { DashboardSummary } from "@/components/dashboard-summary";
 import { ExpiringItems } from "@/components/expiring-items";
 import { RecipeSuggestions } from "@/components/recipe-suggestions";
+import { AIRecipeSuggestions } from "@/components/ai-recipe-suggestions";
+import { MedicinesList } from "@/components/medicines-list";
 import { FoodItemModal } from "@/components/food-item-modal";
 import { apiRequest } from "@/lib/queryClient";
 import { FoodItemWithDaysLeft, RecipeWithMatch } from "@shared/schema";
@@ -77,11 +79,24 @@ export default function DashboardPage() {
           onViewItem={handleViewItem}
         />
         
-        {/* Recipe Suggestions */}
-        <RecipeSuggestions 
-          recipes={recipes} 
-          isLoading={isLoadingRecipes} 
-        />
+        {/* Medicines List */}
+        <MedicinesList />
+        
+        {/* Two-column layout for recipe suggestions */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {/* Traditional Recipe Suggestions */}
+          <div>
+            <RecipeSuggestions 
+              recipes={recipes} 
+              isLoading={isLoadingRecipes} 
+            />
+          </div>
+          
+          {/* AI Recipe Suggestions */}
+          <div>
+            <AIRecipeSuggestions />
+          </div>
+        </div>
       </div>
       
       {/* Food Item Details Modal */}

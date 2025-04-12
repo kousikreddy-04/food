@@ -6,7 +6,7 @@ if (!process.env.OPENAI_API_KEY) {
 
 // Initialize the OpenAI client
 const openai = new OpenAI({ 
-  apiKey: process.env.OPENAI_API_KEY || 'dummy_key' 
+  apiKey: process.env.OPENAI_API_KEY || "dummy_key"
 });
 
 /**
@@ -49,10 +49,14 @@ export async function getRecipeSuggestions(
       response_format: { type: "json_object" },
     });
 
-    const content = response.choices[0].message.content;
-    const result = JSON.parse(content);
+    const content = response.choices[0]?.message?.content || null;
     
-    return result.recipes || [];
+    if (content) {
+      const result = JSON.parse(content);
+      return result.recipes || [];
+    }
+    
+    return [];
   } catch (error) {
     console.error("Error getting recipe suggestions:", error);
     return [{
