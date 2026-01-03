@@ -195,7 +195,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const ingredientNames = nonMedicineItems.map(item => item.name);
       
       // Import the OpenAI function here to avoid circular dependencies
-      const { getRecipeSuggestions } = await import("./openai");
+      const { getRecipeSuggestions } = await import("./gemini");
       
       // Get AI-generated recipe suggestions
       const recipes = await getRecipeSuggestions(ingredientNames);
@@ -245,7 +245,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const base64Image = image.replace(/^data:image\/\w+;base64,/, "");
       
       // Import the OpenAI function
-      const { identifyFoodFromImage } = await import("./openai");
+      const { identifyFoodFromImage } = await import("./gemini");
       
       // Get AI-identified food items
       const identifiedItems = await identifyFoodFromImage(base64Image);
